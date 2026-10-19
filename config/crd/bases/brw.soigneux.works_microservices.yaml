@@ -41,14 +41,6 @@ spec:
             type: object
           status:
             description: MicroserviceStatus defines the observed state of Microservice.
-            properties:
-              ms_list:
-                description: |-
-                  INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-                  Important: Run "make" to regenerate code after modifying this file
-                items:
-                  type: string
-                type: array
             type: object
         type: object
     served: true
