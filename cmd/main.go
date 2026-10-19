@@ -213,6 +213,13 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Microservice")
 		os.Exit(1)
 	}
+	if err := (&controller.PendingMicroserviceReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "PendingMicroservice")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if metricsCertWatcher != nil {
