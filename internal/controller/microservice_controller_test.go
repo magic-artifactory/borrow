@@ -38,7 +38,7 @@ var _ = Describe("Microservice Controller", func() {
 
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
-			Namespace: "default", // TODO(user):Modify as needed
+			Namespace: "sre-system", // TODO(user):Modify as needed
 		}
 		microservice := &brwv1alpha1.Microservice{}
 
@@ -49,7 +49,7 @@ var _ = Describe("Microservice Controller", func() {
 				resource := &brwv1alpha1.Microservice{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
-						Namespace: "default",
+						Namespace: "sre-system",
 					},
 					// TODO(user): Specify other spec details if needed.
 				}

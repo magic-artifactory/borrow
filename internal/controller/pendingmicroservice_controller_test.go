@@ -38,7 +38,7 @@ var _ = Describe("PendingMicroservice Controller", func() {
 
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
-			Namespace: "default", // TODO(user):Modify as needed
+			Namespace: "sre-system", // TODO(user):Modify as needed
 		}
 		pendingmicroservice := &brwv1alpha1.PendingMicroservice{}
 
@@ -49,7 +49,7 @@ var _ = Describe("PendingMicroservice Controller", func() {
 				resource := &brwv1alpha1.PendingMicroservice{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
-						Namespace: "default",
+						Namespace: "sre-system",
 					},
 					// TODO(user): Specify other spec details if needed.
 				}
