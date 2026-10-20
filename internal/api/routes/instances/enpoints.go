@@ -32,6 +32,7 @@ func NewEndpoints(conciliator *operatools.Conciliator) *Endpoints {
 
 func (e *Endpoints) Add(response http.ResponseWriter, req *http.Request) {
 	var status string
+	var msList v1alpha1.MicroserviceList
 
 	state := false
 
@@ -41,7 +42,12 @@ func (e *Endpoints) Add(response http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	ok, err := addInstance(e.ConciliatorPending, body)
+	if err := e.ConciliatorMicroservice.Client.List(e.ConciliatorMicroservice.Ctx, &msList); err != nil {
+		internalServerError(response, err)
+		return
+	}
+
+	pendingInstance, err := addInstance(e.ConciliatorPending, &msList, body)
 	if err != nil {
 		internalServerError(response, err)
 		return
@@ -50,15 +56,18 @@ func (e *Endpoints) Add(response http.ResponseWriter, req *http.Request) {
 	response.Header().Set("Content-type", "application/json")
 	response.WriteHeader(http.StatusOK)
 
-	if ok {
+	if pendingInstance != nil {
 		state = true
 		status = "add to pending"
-	} else {
-		status = "duplicate"
-	}
 
-	if err := json.NewEncoder(response).Encode(map[string]string{"creation": strconv.FormatBool(state), "status": status}); err != nil {
-		internalServerError(response, err)
+		if err := json.NewEncoder(response).Encode(map[string]string{"creation": strconv.FormatBool(state), "status": status, "uuid": pendingInstance.Uid}); err != nil {
+			internalServerError(response, err)
+		}
+	} else {
+		status = "not created"
+		if err := json.NewEncoder(response).Encode(map[string]string{"creation": strconv.FormatBool(state), "status": status}); err != nil {
+			internalServerError(response, err)
+		}
 	}
 }
 
@@ -68,6 +77,8 @@ func (e *Endpoints) Delete(response http.ResponseWriter, req *http.Request) {
 }
 
 func (e *Endpoints) Get(response http.ResponseWriter, req *http.Request) {
+	var msList v1alpha1.MicroserviceList
+
 	path := strings.Split(req.URL.EscapedPath(), "/")
 
 	if len(path) != 2 {
@@ -76,13 +87,12 @@ func (e *Endpoints) Get(response http.ResponseWriter, req *http.Request) {
 	}
 	instanceName := path[1]
 
-	obj, ok := e.ConciliatorMicroservice.Object.(*v1alpha1.Microservice)
-	if !ok {
-		internalServerError(response, errors.New("v1alpha1.Microservice: object nil"))
+	if err := e.ConciliatorMicroservice.Client.List(e.ConciliatorMicroservice.Ctx, &msList); err != nil {
+		internalServerError(response, err)
 		return
 	}
 
-	data, err := json.Marshal(getInstanceInfo(obj, instanceName))
+	data, err := json.Marshal(getInstanceInfo(&msList, instanceName))
 	if err != nil {
 		internalServerError(response, err)
 		return
@@ -100,7 +110,7 @@ func internalServerError(response http.ResponseWriter, err error) {
 	response.Header().Set("Content-type", "application/json")
 	response.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(response).Encode(map[string]string{"error": err.Error()}); err != nil {
+	if err := json.NewEncoder(response).Encode(map[string]error{"error": err}); err != nil {
 		internalServerError(response, err)
 	}
 }
