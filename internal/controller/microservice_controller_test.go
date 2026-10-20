@@ -42,12 +42,26 @@ var _ = Describe("Microservice Controller", func() {
 			Namespace: utils.NamespaceDefault, // TODO(user):Modify as needed
 		}
 		microservice := &brwv1alpha1.Microservice{}
+		pendingMicroservice := &brwv1alpha1.PendingMicroservice{}
 
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind Microservice")
 			err := k8sClient.Get(ctx, typeNamespacedName, microservice)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &brwv1alpha1.Microservice{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      resourceName,
+						Namespace: utils.NamespaceDefault,
+					},
+					// TODO(user): Specify other spec details if needed.
+				}
+				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+			}
+
+			By("creating the custom resource for the Kind PendingMicroservice")
+			err = k8sClient.Get(ctx, typeNamespacedName, pendingMicroservice)
+			if err != nil && errors.IsNotFound(err) {
+				resource := &brwv1alpha1.PendingMicroservice{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: utils.NamespaceDefault,
