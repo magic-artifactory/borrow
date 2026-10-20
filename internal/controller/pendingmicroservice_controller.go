@@ -22,9 +22,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	brwv1alpha1 "github.com/lukas-sgx/borrow/api/v1alpha1"
+	"github.com/lukas-sgx/borrow/pkg/operatools"
 )
 
 // PendingMicroserviceReconciler reconciles a PendingMicroservice object
@@ -47,11 +47,13 @@ type PendingMicroserviceReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
 func (r *PendingMicroserviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = logf.FromContext(ctx)
-
-	// TODO(user): your logic here
-
-	return ctrl.Result{}, nil
+	return operatools.Reconcile(
+		r,
+		r.Client,
+		req,
+		ctx,
+		&brwv1alpha1.PendingMicroservice{},
+	)
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -60,4 +62,8 @@ func (r *PendingMicroserviceReconciler) SetupWithManager(mgr ctrl.Manager) error
 		For(&brwv1alpha1.PendingMicroservice{}).
 		Named("pendingmicroservice").
 		Complete(r)
+}
+
+func (r *PendingMicroserviceReconciler) Process(conciliator *operatools.Conciliator) error {
+	return nil
 }
