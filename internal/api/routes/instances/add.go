@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/google/uuid"
 	"github.com/lukas-sgx/borrow/api/v1alpha1"
 	"github.com/lukas-sgx/borrow/pkg/operatools"
 
@@ -20,9 +21,18 @@ func patchStatusRessource(ctx context.Context, c client.Client, obj client.Objec
 	return nil
 }
 
+func checkDuplicateMsRessource(MsList *v1alpha1.MicroserviceList, data *utils.PendingRessource) bool {
+	for _, ms := range MsList.Items {
+		if ms.Status.Spec.Name == data.ProjectName || ms.Status.Spec.Uid == data.Uid {
+			return true
+		}
+	}
+	return false
+}
+
 func checkDuplicatePendingRessource(items []utils.PendingRessource, data *utils.PendingRessource) bool {
 	for _, item := range items {
-		if item.ProjectName == data.ProjectName {
+		if item.ProjectName == data.ProjectName || item.Uid == data.Uid {
 			return true
 		}
 	}
@@ -30,21 +40,27 @@ func checkDuplicatePendingRessource(items []utils.PendingRessource, data *utils.
 	return false
 }
 
-func addInstance(conciliotor *operatools.Conciliator, body []byte) (bool, error) {
+func addInstance(conciliotor *operatools.Conciliator, MsList *v1alpha1.MicroserviceList, body []byte) (*utils.PendingRessource, error) {
 	var data utils.PendingRessource
 
 	microservicePending := conciliotor.Object.(*v1alpha1.PendingMicroservice)
 
 	if err := utils.ObjectNil(microservicePending); err != nil {
-		return false, err
+		return nil, err
 	}
 
 	if err := json.Unmarshal(body, &data); err != nil {
-		return false, err
+		return nil, err
 	}
+	
+	data.Uid = uuid.New().String()
 
 	if checkDuplicatePendingRessource(microservicePending.Status.Ressources, &data) {
-		return false, nil
+		return nil, nil
+	}
+
+	if checkDuplicateMsRessource(MsList, &data) {
+		return nil, nil
 	}
 
 	patch := microservicePending.DeepCopy()
@@ -56,8 +72,8 @@ func addInstance(conciliotor *operatools.Conciliator, body []byte) (bool, error)
 		microservicePending,
 		patch,
 	); err != nil {
-		return false, err
+		return nil, err
 	}
 
-	return true, nil
+	return &data, nil
 }

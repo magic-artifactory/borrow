@@ -41,6 +41,23 @@ spec:
             type: object
           status:
             description: MicroserviceStatus defines the observed state of Microservice.
+            properties:
+              spec:
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    description: CreationTimestamp  `json:"name"`
+                    type: string
+                  uid:
+                    type: string
+                required:
+                - name
+                - namespace
+                - uid
+                type: object
+            required:
+            - spec
             type: object
         type: object
     served: true

@@ -55,10 +55,13 @@ spec:
                       type: string
                     project_name:
                       type: string
+                    uid:
+                      type: string
                   required:
                   - branch
                   - charts
                   - project_name
+                  - uid
                   type: object
                 type: array
             type: object
