@@ -1,7 +1,6 @@
 package instances
 
 import (
-	"context"
 	"encoding/json"
 
 	"github.com/google/uuid"
@@ -9,17 +8,7 @@ import (
 	"github.com/lukas-sgx/borrow/pkg/operatools"
 
 	"github.com/lukas-sgx/borrow/pkg/utils"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
-
-func patchStatusRessource(ctx context.Context, c client.Client, obj client.Object, patch client.Object) error {
-	mergePatch := client.MergeFrom(patch)
-
-	if err := c.Status().Patch(ctx, obj, mergePatch); err != nil {
-		return err
-	}
-	return nil
-}
 
 func checkDuplicateMsRessource(MsList *v1alpha1.MicroserviceList, data *utils.PendingRessource) bool {
 	for _, ms := range MsList.Items {
@@ -66,7 +55,7 @@ func addInstance(conciliotor *operatools.Conciliator, MsList *v1alpha1.Microserv
 	patch := microservicePending.DeepCopy()
 	microservicePending.Status.Ressources = append(microservicePending.Status.Ressources, data)
 
-	if err := patchStatusRessource(
+	if err := operatools.PatchStatusRessource(
 		conciliotor.Ctx,
 		conciliotor.Client,
 		microservicePending,
