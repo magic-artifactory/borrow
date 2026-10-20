@@ -3,8 +3,8 @@ package controller
 import (
 	"net/http"
 
-	"github.com/lukas-sgx/borrow/internal/api/routes/instances"
-	"github.com/lukas-sgx/borrow/pkg/operatools"
+	"github.com/magic-artifactory/borrow/internal/api/routes/instances"
+	"github.com/magic-artifactory/borrow/pkg/operatools"
 )
 
 func routesInstance(conciliator *operatools.Conciliator) http.Handler {

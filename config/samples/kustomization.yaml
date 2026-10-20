@@ -1,4 +1,5 @@
 ## Append samples of your project ##
 resources:
 - brw_v1alpha1_microservice.yaml
+- brw_v1alpha1_pendingmicroservice.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

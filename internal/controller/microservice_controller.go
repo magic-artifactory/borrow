@@ -1,5 +1,5 @@
 /*
-Copyright 2026 lukas-sgx.
+Copyright 2026 magic-artifactory.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,14 +18,19 @@ package controller
 
 import (
 	"context"
+	"net/http"
+	"slices"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	brwv1alpha1 "github.com/lukas-sgx/borrow/api/v1alpha1"
-	"github.com/lukas-sgx/borrow/pkg/operatools"
-	"github.com/lukas-sgx/borrow/pkg/utils"
+	brwv1alpha1 "github.com/magic-artifactory/borrow/api/v1alpha1"
+	"github.com/magic-artifactory/borrow/pkg/operatools"
+	"github.com/magic-artifactory/borrow/pkg/utils"
 )
 
 // MicroserviceReconciler reconciles a Microservice object
@@ -37,6 +42,8 @@ type MicroserviceReconciler struct {
 // +kubebuilder:rbac:groups=brw.soigneux.works,resources=microservices,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=brw.soigneux.works,resources=microservices/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=brw.soigneux.works,resources=microservices/finalizers,verbs=update
+// +kubebuilder:rbac:groups=brw.soigneux.works,resources=pendingmicroservices,verbs=get;list;watch
+// +kubebuilder:rbac:groups=brw.soigneux.works,resources=pendingmicroservices/status,verbs=get;update;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -62,13 +69,71 @@ func (r *MicroserviceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&brwv1alpha1.Microservice{}).
 		Named("microservice").
+		Watches(
+			&brwv1alpha1.PendingMicroservice{},
+			handler.EnqueueRequestsFromMapFunc(r.pendingToMicroservice),
+		).
 		Complete(r)
 }
 
+func (r *MicroserviceReconciler) pendingToMicroservice(ctx context.Context, obj client.Object) []reconcile.Request {
+	pending, ok := obj.(*brwv1alpha1.PendingMicroservice)
+	if !ok {
+		return nil
+	}
+
+	return []reconcile.Request{{
+		NamespacedName: types.NamespacedName{
+			Name:      "microservice-sample",
+			Namespace: pending.Namespace,
+		},
+	}}
+}
+
+func deletePendingObject(conciliator *operatools.Conciliator, pendingObject *brwv1alpha1.PendingMicroservice, uid string) error {
+	patch := pendingObject.DeepCopy()
+	pendingObject.Status.Resources = slices.DeleteFunc(pendingObject.Status.Resources, func(res utils.PendingResource) bool {
+		return uid == res.Uid
+	})
+
+	if err := operatools.PatchStatusResource(
+		conciliator.Ctx,
+		conciliator.Client,
+		pendingObject,
+		patch,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *MicroserviceReconciler) ProcessPendingMs(conciliator *operatools.Conciliator, pendingObject *brwv1alpha1.PendingMicroservice) error {
+	for _, object := range pendingObject.Status.Resources {
+		_, err := http.Get(object.Charts)
+		if err != nil {
+			if err := deletePendingObject(conciliator, pendingObject, object.Uid); err != nil {
+				return err
+			}
+		}
+
+		// response.Body
+	}
+	return nil
+}
+
 func (r *MicroserviceReconciler) Process(conciliator *operatools.Conciliator) error {
-	object := conciliator.Object.(*brwv1alpha1.Microservice)
+	msObject := conciliator.Object.(*brwv1alpha1.Microservice)
+
+	pendingObject := brwv1alpha1.PendingMicroservice{}
+	Resource := types.NamespacedName{
+		Name:      "pendingmicroservice-sample",
+		Namespace: utils.NamespaceSRE,
+	}
 
 	return utils.NewRunner().
-		Run(func() error { return utils.ObjectNil(object) }).
+		Run(func() error { return utils.ObjectNil(msObject) }).
+		Run(func() error { return conciliator.Client.Get(conciliator.Ctx, Resource, &pendingObject) }).
+		Run(func() error { return r.ProcessPendingMs(conciliator, &pendingObject) }).
 		Err()
 }
