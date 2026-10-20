@@ -1,3 +1,3 @@
 package utils
 
-const NamespaceDefault = "sre-system"
+const NamespaceDefault = "default"
