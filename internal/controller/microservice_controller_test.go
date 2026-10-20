@@ -28,6 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	brwv1alpha1 "github.com/lukas-sgx/borrow/api/v1alpha1"
+	"github.com/lukas-sgx/borrow/pkg/utils"
 )
 
 var _ = Describe("Microservice Controller", func() {
@@ -38,7 +39,7 @@ var _ = Describe("Microservice Controller", func() {
 
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
-			Namespace: "sre-system", // TODO(user):Modify as needed
+			Namespace: utils.NamespaceDefault, // TODO(user):Modify as needed
 		}
 		microservice := &brwv1alpha1.Microservice{}
 
@@ -49,7 +50,7 @@ var _ = Describe("Microservice Controller", func() {
 				resource := &brwv1alpha1.Microservice{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
-						Namespace: "sre-system",
+						Namespace: utils.NamespaceDefault,
 					},
 					// TODO(user): Specify other spec details if needed.
 				}
