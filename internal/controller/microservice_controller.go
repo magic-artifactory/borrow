@@ -28,7 +28,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/lukas-sgx/borrow/api/v1alpha1"
 	brwv1alpha1 "github.com/lukas-sgx/borrow/api/v1alpha1"
 	"github.com/lukas-sgx/borrow/pkg/operatools"
 	"github.com/lukas-sgx/borrow/pkg/utils"
@@ -71,14 +70,14 @@ func (r *MicroserviceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&brwv1alpha1.Microservice{}).
 		Named("microservice").
 		Watches(
-			&v1alpha1.PendingMicroservice{},
+			&brwv1alpha1.PendingMicroservice{},
 			handler.EnqueueRequestsFromMapFunc(r.pendingToMicroservice),
 		).
 		Complete(r)
 }
 
 func (r *MicroserviceReconciler) pendingToMicroservice(ctx context.Context, obj client.Object) []reconcile.Request {
-	pending, ok := obj.(*v1alpha1.PendingMicroservice)
+	pending, ok := obj.(*brwv1alpha1.PendingMicroservice)
 	if !ok {
 		return nil
 	}
@@ -113,7 +112,9 @@ func (r *MicroserviceReconciler) ProcessPendingMs(conciliator *operatools.Concil
 	for _, object := range pendingObject.Status.Resources {
 		_, err := http.Get(object.Charts)
 		if err != nil {
-			deletePendingObject(conciliator, pendingObject, object.Uid)
+			if err := deletePendingObject(conciliator, pendingObject, object.Uid); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -122,7 +123,7 @@ func (r *MicroserviceReconciler) ProcessPendingMs(conciliator *operatools.Concil
 func (r *MicroserviceReconciler) Process(conciliator *operatools.Conciliator) error {
 	msObject := conciliator.Object.(*brwv1alpha1.Microservice)
 
-	pendingObject := v1alpha1.PendingMicroservice{}
+	pendingObject := brwv1alpha1.PendingMicroservice{}
 	Resource := types.NamespacedName{
 		Name:      "pendingmicroservice-sample",
 		Namespace: utils.NamespaceSRE,
