@@ -52,7 +52,7 @@ func addInstance(conciliotor *operatools.Conciliator, MsList *v1alpha1.Microserv
 	if err := json.Unmarshal(body, &data); err != nil {
 		return nil, err
 	}
-	
+
 	data.Uid = uuid.New().String()
 
 	if checkDuplicatePendingRessource(microservicePending.Status.Ressources, &data) {
