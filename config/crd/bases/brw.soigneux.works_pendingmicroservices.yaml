@@ -49,17 +49,14 @@ spec:
                   Important: Run "make" to regenerate code after modifying this file
                 items:
                   properties:
-                    branch:
-                      type: string
-                    charts:
+                    charts_url:
                       type: string
                     project_name:
                       type: string
                     uid:
                       type: string
                   required:
-                  - branch
-                  - charts
+                  - charts_url
                   - project_name
                   - uid
                   type: object

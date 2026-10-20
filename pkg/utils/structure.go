@@ -1,8 +1,7 @@
 package utils
 
 type PendingRessource struct {
-	Charts      string `json:"charts"`
-	Branch      string `json:"branch"`
+	Charts      string `json:"charts_url"`
 	ProjectName string `json:"project_name"`
 	Uid         string `json:"uid"`
 }
