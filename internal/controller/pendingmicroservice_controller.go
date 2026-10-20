@@ -1,5 +1,5 @@
 /*
-Copyright 2026 lukas-sgx.
+Copyright 2026 magic-artifactory.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	brwv1alpha1 "github.com/lukas-sgx/borrow/api/v1alpha1"
-	"github.com/lukas-sgx/borrow/pkg/operatools"
+	brwv1alpha1 "github.com/magic-artifactory/borrow/api/v1alpha1"
+	"github.com/magic-artifactory/borrow/pkg/operatools"
 )
 
 // PendingMicroserviceReconciler reconciles a PendingMicroservice object

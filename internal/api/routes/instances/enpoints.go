@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lukas-sgx/borrow/api/v1alpha1"
-	"github.com/lukas-sgx/borrow/pkg/operatools"
+	"github.com/magic-artifactory/borrow/api/v1alpha1"
+	"github.com/magic-artifactory/borrow/pkg/operatools"
 )
 
 type Endpoints struct {

@@ -1,4 +1,4 @@
-module github.com/lukas-sgx/borrow
+module github.com/magic-artifactory/borrow
 
 go 1.27.3
 

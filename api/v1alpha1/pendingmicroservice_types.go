@@ -1,5 +1,5 @@
 /*
-Copyright 2026 lukas-sgx.
+Copyright 2026 magic-artifactory.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/lukas-sgx/borrow/pkg/utils"
+	"github.com/magic-artifactory/borrow/pkg/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

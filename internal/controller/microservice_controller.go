@@ -1,5 +1,5 @@
 /*
-Copyright 2026 lukas-sgx.
+Copyright 2026 magic-artifactory.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	brwv1alpha1 "github.com/lukas-sgx/borrow/api/v1alpha1"
-	"github.com/lukas-sgx/borrow/pkg/operatools"
-	"github.com/lukas-sgx/borrow/pkg/utils"
+	brwv1alpha1 "github.com/magic-artifactory/borrow/api/v1alpha1"
+	"github.com/magic-artifactory/borrow/pkg/operatools"
+	"github.com/magic-artifactory/borrow/pkg/utils"
 )
 
 // MicroserviceReconciler reconciles a Microservice object
@@ -116,6 +116,8 @@ func (r *MicroserviceReconciler) ProcessPendingMs(conciliator *operatools.Concil
 				return err
 			}
 		}
+
+		// response.Body
 	}
 	return nil
 }

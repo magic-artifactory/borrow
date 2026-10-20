@@ -1,5 +1,5 @@
 /*
-Copyright 2026 lukas-sgx.
+Copyright 2026 magic-artifactory.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	brwv1alpha1 "github.com/lukas-sgx/borrow/api/v1alpha1"
-	"github.com/lukas-sgx/borrow/pkg/utils"
+	brwv1alpha1 "github.com/magic-artifactory/borrow/api/v1alpha1"
+	"github.com/magic-artifactory/borrow/pkg/utils"
 )
 
 var _ = Describe("Microservice Controller", func() {

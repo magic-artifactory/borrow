@@ -46,4 +46,4 @@ jobs:
 
       - name: Publish to go.dev
         if: ${{ steps.release.outputs.release_created }}
-        run: GOPROXY=proxy.golang.org go list -m github.com/lukas-sgx/borrow@${{ steps.release.outputs.tag_name }}
+        run: GOPROXY=proxy.golang.org go list -m github.com/magic-artifactory/borrow@${{ steps.release.outputs.tag_name }}

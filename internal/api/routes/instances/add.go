@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 
 	"github.com/google/uuid"
-	"github.com/lukas-sgx/borrow/api/v1alpha1"
-	"github.com/lukas-sgx/borrow/pkg/operatools"
+	"github.com/magic-artifactory/borrow/api/v1alpha1"
+	"github.com/magic-artifactory/borrow/pkg/operatools"
 
-	"github.com/lukas-sgx/borrow/pkg/utils"
+	"github.com/magic-artifactory/borrow/pkg/utils"
 )
 
 func checkDuplicateMsResource(MsList *v1alpha1.MicroserviceList, data *utils.PendingResource) bool {

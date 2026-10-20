@@ -1,7 +1,7 @@
 package instances
 
 import (
-	"github.com/lukas-sgx/borrow/api/v1alpha1"
+	"github.com/magic-artifactory/borrow/api/v1alpha1"
 )
 
 type Instance struct {
