@@ -6,12 +6,12 @@ import (
 )
 
 func GetClient(conciliator *Conciliator, name string, namespace string, object client.Object) {
-	ressource := types.NamespacedName{
+	resource := types.NamespacedName{
 		Name:      name,
 		Namespace: namespace,
 	}
 
-	if err := conciliator.Client.Get(conciliator.Ctx, ressource, object); err != nil {
+	if err := conciliator.Client.Get(conciliator.Ctx, resource, object); err != nil {
 		conciliator.Log.Error(err, "")
 		return
 	}

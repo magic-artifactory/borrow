@@ -35,7 +35,7 @@ type MicroserviceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Spec utils.RessourceSpec `json:"spec"`
+	Spec utils.ResourceSpec `json:"spec"`
 }
 
 // +kubebuilder:object:root=true

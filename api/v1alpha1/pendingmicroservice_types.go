@@ -34,7 +34,7 @@ type PendingMicroserviceSpec struct {
 type PendingMicroserviceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Ressources []utils.PendingRessource `json:"ressources,omitempty"`
+	Resources []utils.PendingResource `json:"resources,omitempty"`
 }
 
 // +kubebuilder:object:root=true
