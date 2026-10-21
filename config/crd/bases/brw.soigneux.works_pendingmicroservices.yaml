@@ -39,28 +39,23 @@ spec:
             type: object
           spec:
             description: PendingMicroserviceSpec defines the desired state of PendingMicroservice.
+            properties:
+              charts_url:
+                description: |-
+                  INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file
+                type: string
+              project_name:
+                type: string
+              uid:
+                type: string
+            required:
+            - charts_url
+            - project_name
+            - uid
             type: object
           status:
             description: PendingMicroserviceStatus defines the observed state of PendingMicroservice.
-            properties:
-              resources:
-                description: |-
-                  INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-                  Important: Run "make" to regenerate code after modifying this file
-                items:
-                  properties:
-                    charts_url:
-                      type: string
-                    project_name:
-                      type: string
-                    uid:
-                      type: string
-                  required:
-                  - charts_url
-                  - project_name
-                  - uid
-                  type: object
-                type: array
             type: object
         type: object
     served: true

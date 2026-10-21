@@ -11,10 +11,10 @@ type Instance struct {
 
 func getInstanceInfo(MsList *v1alpha1.MicroserviceList, uid string) *Instance {
 	for _, ms := range MsList.Items {
-		if ms.Status.Spec.Uid == uid {
+		if ms.Spec.Uid == uid {
 			return &Instance{
-				Name:      ms.Status.Spec.Name,
-				Namespace: ms.Status.Spec.Namespace,
+				Name:      ms.GetName(),
+				Namespace: ms.GetNamespace(),
 			}
 		}
 	}

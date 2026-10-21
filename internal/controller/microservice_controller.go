@@ -18,15 +18,10 @@ package controller
 
 import (
 	"context"
-	"net/http"
-	"slices"
 
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	brwv1alpha1 "github.com/magic-artifactory/borrow/api/v1alpha1"
 	"github.com/magic-artifactory/borrow/pkg/operatools"
@@ -69,71 +64,51 @@ func (r *MicroserviceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&brwv1alpha1.Microservice{}).
 		Named("microservice").
-		Watches(
-			&brwv1alpha1.PendingMicroservice{},
-			handler.EnqueueRequestsFromMapFunc(r.pendingToMicroservice),
-		).
 		Complete(r)
 }
 
-func (r *MicroserviceReconciler) pendingToMicroservice(ctx context.Context, obj client.Object) []reconcile.Request {
-	pending, ok := obj.(*brwv1alpha1.PendingMicroservice)
-	if !ok {
-		return nil
-	}
+// func (r *MicroserviceReconciler) ProcessPendingMs(conciliator *operatools.Conciliator, pendingObject *brwv1alpha1.PendingMicroservice) error {
+// 	var req = &http.Client{Timeout: 10 * time.Second}
+// 	patch := pendingObject.DeepCopy()
 
-	return []reconcile.Request{{
-		NamespacedName: types.NamespacedName{
-			Name:      "microservice-sample",
-			Namespace: pending.Namespace,
-		},
-	}}
-}
+// 	done := make(map[string]bool)
+// 	for _, res := range slices.Clone(pendingObject.Status.Resources) {
+// 		resp, err := req.Get(res.Charts)
+// 		fmt.Println(res.Charts)
+// 		if err != nil {
+// 			continue
+// 		}
+// 		resp.Body.Close()
+// 		done[res.Uid] = true
+// 	}
 
-func deletePendingObject(conciliator *operatools.Conciliator, pendingObject *brwv1alpha1.PendingMicroservice, uid string) error {
-	patch := pendingObject.DeepCopy()
-	pendingObject.Status.Resources = slices.DeleteFunc(pendingObject.Status.Resources, func(res utils.PendingResource) bool {
-		return uid == res.Uid
-	})
+// 	if len(done) == 0 {
+// 		return nil
+// 	}
 
-	if err := operatools.PatchStatusResource(
-		conciliator.Ctx,
-		conciliator.Client,
-		pendingObject,
-		patch,
-	); err != nil {
-		return err
-	}
+// 	pendingObject.Status.Resources = slices.DeleteFunc(pendingObject.Status.Resources, func(res utils.PendingResource) bool {
+// 		return done[res.Uid]
+// 	})
 
-	return nil
-}
-
-func (r *MicroserviceReconciler) ProcessPendingMs(conciliator *operatools.Conciliator, pendingObject *brwv1alpha1.PendingMicroservice) error {
-	for _, object := range pendingObject.Status.Resources {
-		_, err := http.Get(object.Charts)
-		if err != nil {
-			if err := deletePendingObject(conciliator, pendingObject, object.Uid); err != nil {
-				return err
-			}
-		}
-
-		// response.Body
-	}
-	return nil
-}
+// 	return operatools.PatchStatusResource(conciliator.Ctx, conciliator.Client, pendingObject, patch)
+// }
 
 func (r *MicroserviceReconciler) Process(conciliator *operatools.Conciliator) error {
 	msObject := conciliator.Object.(*brwv1alpha1.Microservice)
-
-	pendingObject := brwv1alpha1.PendingMicroservice{}
-	Resource := types.NamespacedName{
-		Name:      "pendingmicroservice-sample",
-		Namespace: utils.NamespaceSRE,
+	if err := utils.ObjectNil(msObject); err != nil {
+		return err
 	}
 
-	return utils.NewRunner().
-		Run(func() error { return utils.ObjectNil(msObject) }).
-		Run(func() error { return conciliator.Client.Get(conciliator.Ctx, Resource, &pendingObject) }).
-		Run(func() error { return r.ProcessPendingMs(conciliator, &pendingObject) }).
-		Err()
+	// var pendingList brwv1alpha1.PendingMicroserviceList
+	// if err := r.Client.List(conciliator.Ctx, &pendingList, client.InNamespace(msObject.GetNamespace())); err != nil {
+	// 	return nil
+	// }
+
+	// for _, pendingItem := range pendingList.Items {
+	// 	if err := r.ProcessPendingMs(conciliator, &pendingItem); err != nil {
+	// 		return err
+	// 	}
+	// }
+
+	return nil
 }

@@ -17,7 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/magic-artifactory/borrow/pkg/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -28,13 +27,15 @@ import (
 type PendingMicroserviceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Charts      string `json:"charts_url"`
+	ProjectName string `json:"project_name"`
+	Uid         string `json:"uid"`
 }
 
 // PendingMicroserviceStatus defines the observed state of PendingMicroservice.
 type PendingMicroserviceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Resources []utils.PendingResource `json:"resources,omitempty"`
 }
 
 // +kubebuilder:object:root=true
