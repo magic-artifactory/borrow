@@ -1,5 +1,5 @@
 /*
-Copyright 2026 lukas-sgx.
+Copyright 2026 magic-artifactory.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	brwv1alpha1 "github.com/lukas-sgx/borrow/api/v1alpha1"
+	brwv1alpha1 "github.com/magic-artifactory/borrow/api/v1alpha1"
+	"github.com/magic-artifactory/borrow/pkg/utils"
 )
 
 var _ = Describe("Microservice Controller", func() {
@@ -38,9 +39,10 @@ var _ = Describe("Microservice Controller", func() {
 
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
-			Namespace: "default", // TODO(user):Modify as needed
+			Namespace: utils.NamespaceDefault, // TODO(user):Modify as needed
 		}
 		microservice := &brwv1alpha1.Microservice{}
+		pendingMicroservice := &brwv1alpha1.PendingMicroservice{}
 
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind Microservice")
@@ -49,7 +51,20 @@ var _ = Describe("Microservice Controller", func() {
 				resource := &brwv1alpha1.Microservice{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
-						Namespace: "default",
+						Namespace: utils.NamespaceDefault,
+					},
+					// TODO(user): Specify other spec details if needed.
+				}
+				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+			}
+
+			By("creating the custom resource for the Kind PendingMicroservice")
+			err = k8sClient.Get(ctx, typeNamespacedName, pendingMicroservice)
+			if err != nil && errors.IsNotFound(err) {
+				resource := &brwv1alpha1.PendingMicroservice{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      resourceName,
+						Namespace: utils.NamespaceDefault,
 					},
 					// TODO(user): Specify other spec details if needed.
 				}

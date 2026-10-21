@@ -3,6 +3,7 @@
 # It should be run by config/default
 resources:
 - bases/brw.soigneux.works_microservices.yaml
+- bases/brw.soigneux.works_pendingmicroservices.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patches:

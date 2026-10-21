@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	controller "github.com/lukas-sgx/borrow/internal/api/routes"
-	"github.com/lukas-sgx/borrow/pkg/operatools"
+	controller "github.com/magic-artifactory/borrow/internal/api/routes"
+	"github.com/magic-artifactory/borrow/pkg/operatools"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )

@@ -12,8 +12,8 @@ type Reconciler interface {
 	Process(conciliator *Conciliator) error
 }
 
-func processRessource(conciliator *Conciliator, req ctrl.Request, r Reconciler) error {
-	conciliator.Log.Info("Processing Ressource",
+func processResource(conciliator *Conciliator, req ctrl.Request, r Reconciler) error {
+	conciliator.Log.Info("Processing Resource",
 		"namespace", req.Namespace,
 		"name", req.Name,
 	)
@@ -29,9 +29,18 @@ func Reconcile(r Reconciler, c client.Client, req ctrl.Request,
 
 	conciliator := NewConciliator(ctrl.Log, object, c, ctx)
 
-	if err := processRessource(conciliator, req, r); err != nil {
+	if err := processResource(conciliator, req, r); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func PatchStatusResource(ctx context.Context, c client.Client, obj client.Object, patch client.Object) error {
+	mergePatch := client.MergeFrom(patch)
+
+	if err := c.Status().Patch(ctx, obj, mergePatch); err != nil {
+		return err
+	}
+	return nil
 }

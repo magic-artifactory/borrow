@@ -1,5 +1,5 @@
 /*
-Copyright 2026 lukas-sgx.
+Copyright 2026 magic-artifactory.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,13 +27,17 @@ import (
 type MicroserviceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Charts      string `json:"charts_url"`
+	ProjectName string `json:"project_name"`
+	Uid         string `json:"uid"`
 }
 
 // MicroserviceStatus defines the observed state of Microservice.
 type MicroserviceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	MsList []string `json:"ms_list,omitempty"`
+
+	// Spec utils.ResourceSpec `json:"spec"`
 }
 
 // +kubebuilder:object:root=true
