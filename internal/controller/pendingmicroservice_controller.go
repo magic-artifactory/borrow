@@ -25,6 +25,7 @@ import (
 
 	brwv1alpha1 "github.com/magic-artifactory/borrow/api/v1alpha1"
 	"github.com/magic-artifactory/borrow/pkg/operatools"
+	"github.com/magic-artifactory/borrow/pkg/utils"
 )
 
 // PendingMicroserviceReconciler reconciles a PendingMicroservice object
@@ -65,5 +66,10 @@ func (r *PendingMicroserviceReconciler) SetupWithManager(mgr ctrl.Manager) error
 }
 
 func (r *PendingMicroserviceReconciler) Process(conciliator *operatools.Conciliator) error {
+	object := conciliator.Object.(*brwv1alpha1.PendingMicroservice)
+	if err := utils.ObjectNil(object); err != nil {
+		return err
+	}
+
 	return nil
 }

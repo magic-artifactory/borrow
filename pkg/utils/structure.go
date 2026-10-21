@@ -1,6 +1,6 @@
 package utils
 
-type PendingResource struct {
+type SpecPendingResource struct {
 	Charts      string `json:"charts_url"`
 	ProjectName string `json:"project_name"`
 	Uid         string `json:"uid"`

@@ -6,35 +6,39 @@ import (
 	"github.com/google/uuid"
 	"github.com/magic-artifactory/borrow/api/v1alpha1"
 	"github.com/magic-artifactory/borrow/pkg/operatools"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/magic-artifactory/borrow/pkg/utils"
 )
 
-func checkDuplicateMsResource(MsList *v1alpha1.MicroserviceList, data *utils.PendingResource) bool {
-	for _, ms := range MsList.Items {
-		if ms.Status.Spec.Name == data.ProjectName || ms.Status.Spec.Uid == data.Uid {
+func checkDuplicateMsResource(msList *v1alpha1.MicroserviceList, data *utils.SpecPendingResource) bool {
+	for _, ms := range msList.Items {
+		if ms.Spec.ProjectName == data.ProjectName || ms.Spec.Uid == data.Uid {
 			return true
 		}
 	}
 	return false
 }
 
-func checkDuplicatePendingResource(items []utils.PendingResource, data *utils.PendingResource) bool {
-	for _, item := range items {
-		if item.ProjectName == data.ProjectName || item.Uid == data.Uid {
+func checkDuplicatePendingResource(pendingMsList *v1alpha1.PendingMicroserviceList, data *utils.SpecPendingResource) bool {
+	for _, item := range pendingMsList.Items {
+		if item.Spec.ProjectName == data.ProjectName || item.Spec.Uid == data.Uid {
 			return true
 		}
 	}
-
 	return false
 }
 
-func addInstance(conciliotor *operatools.Conciliator, MsList *v1alpha1.MicroserviceList, body []byte) (*utils.PendingResource, error) {
-	var data utils.PendingResource
+func addInstance(conciliator *operatools.Conciliator, body []byte) (*utils.SpecPendingResource, error) {
+	var data utils.SpecPendingResource
+	var pendingMsList v1alpha1.PendingMicroserviceList
+	var msList v1alpha1.MicroserviceList
 
-	microservicePending := conciliotor.Object.(*v1alpha1.PendingMicroservice)
+	if err := conciliator.Client.List(conciliator.Ctx, &msList); err != nil {
+		return nil, err
+	}
 
-	if err := utils.ObjectNil(microservicePending); err != nil {
+	if err := conciliator.Client.List(conciliator.Ctx, &pendingMsList); err != nil {
 		return nil, err
 	}
 
@@ -44,23 +48,22 @@ func addInstance(conciliotor *operatools.Conciliator, MsList *v1alpha1.Microserv
 
 	data.Uid = uuid.New().String()
 
-	if checkDuplicatePendingResource(microservicePending.Status.Resources, &data) {
+	if checkDuplicatePendingResource(&pendingMsList, &data) || checkDuplicateMsResource(&msList, &data) {
 		return nil, nil
 	}
 
-	if checkDuplicateMsResource(MsList, &data) {
-		return nil, nil
+	newPending := v1alpha1.PendingMicroservice{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      data.ProjectName,
+			Namespace: utils.NamespaceSRE,
+		},
 	}
 
-	patch := microservicePending.DeepCopy()
-	microservicePending.Status.Resources = append(microservicePending.Status.Resources, data)
+	newPending.Spec.Charts = data.Charts
+	newPending.Spec.ProjectName = data.ProjectName
+	newPending.Spec.Uid = data.Uid
 
-	if err := operatools.PatchStatusResource(
-		conciliotor.Ctx,
-		conciliotor.Client,
-		microservicePending,
-		patch,
-	); err != nil {
+	if err := conciliator.Client.Create(conciliator.Ctx, &newPending); err != nil {
 		return nil, err
 	}
 

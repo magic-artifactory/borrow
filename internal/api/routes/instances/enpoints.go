@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,26 +14,17 @@ import (
 )
 
 type Endpoints struct {
-	ConciliatorMicroservice *operatools.Conciliator
-	ConciliatorPending      *operatools.Conciliator
+	Conciliator *operatools.Conciliator
 }
 
 func NewEndpoints(conciliator *operatools.Conciliator) *Endpoints {
-	conciliatorPending := new(operatools.Conciliator)
-	*conciliatorPending = *conciliator
-
-	operatools.GetClient(conciliator, "microservice-sample", "sre-system", &v1alpha1.Microservice{})
-	operatools.GetClient(conciliatorPending, "pendingmicroservice-sample", "sre-system", &v1alpha1.PendingMicroservice{})
-
 	return &Endpoints{
-		ConciliatorPending:      conciliatorPending,
-		ConciliatorMicroservice: conciliator,
+		Conciliator: conciliator,
 	}
 }
 
 func (e *Endpoints) Add(response http.ResponseWriter, req *http.Request) {
 	var status string
-	var msList v1alpha1.MicroserviceList
 
 	state := false
 
@@ -42,12 +34,7 @@ func (e *Endpoints) Add(response http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := e.ConciliatorMicroservice.Client.List(e.ConciliatorMicroservice.Ctx, &msList); err != nil {
-		internalServerError(response, err)
-		return
-	}
-
-	pendingInstance, err := addInstance(e.ConciliatorPending, &msList, body)
+	pendingInstance, err := addInstance(e.Conciliator, body)
 	if err != nil {
 		internalServerError(response, err)
 		return
@@ -87,7 +74,7 @@ func (e *Endpoints) Get(response http.ResponseWriter, req *http.Request) {
 	}
 	instanceName := path[1]
 
-	if err := e.ConciliatorMicroservice.Client.List(e.ConciliatorMicroservice.Ctx, &msList); err != nil {
+	if err := e.Conciliator.Client.List(e.Conciliator.Ctx, &msList); err != nil {
 		internalServerError(response, err)
 		return
 	}
@@ -108,9 +95,9 @@ func (e *Endpoints) Get(response http.ResponseWriter, req *http.Request) {
 
 func internalServerError(response http.ResponseWriter, err error) {
 	response.Header().Set("Content-type", "application/json")
-	response.WriteHeader(http.StatusOK)
+	response.WriteHeader(http.StatusInternalServerError)
 
-	if err := json.NewEncoder(response).Encode(map[string]error{"error": err}); err != nil {
-		internalServerError(response, err)
+	if err := json.NewEncoder(response).Encode(map[string]string{"error": err.Error()}); err != nil {
+		log.Printf("failed to encode error response: %v", err)
 	}
 }
