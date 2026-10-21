@@ -45,13 +45,13 @@ func (e *Endpoints) Add(response http.ResponseWriter, req *http.Request) {
 
 	if pendingInstance != nil {
 		state = true
-		status = "add to pending"
+		status = "add to pending..."
 
 		if err := json.NewEncoder(response).Encode(map[string]string{"creation": strconv.FormatBool(state), "status": status, "uuid": pendingInstance.Uid}); err != nil {
 			internalServerError(response, err)
 		}
 	} else {
-		status = "not created"
+		status = "another instance already exist with same project name"
 		if err := json.NewEncoder(response).Encode(map[string]string{"creation": strconv.FormatBool(state), "status": status}); err != nil {
 			internalServerError(response, err)
 		}
