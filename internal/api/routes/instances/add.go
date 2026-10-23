@@ -22,7 +22,7 @@ func checkDuplicateMsResource(msList *v1alpha1.MicroserviceList, data *utils.Spe
 
 func checkDuplicatePendingResource(pendingMsList *v1alpha1.PendingMicroserviceList, data *utils.SpecPendingResource) bool {
 	for _, item := range pendingMsList.Items {
-		if item.Spec.ProjectName == data.ProjectName || item.Spec.Uid == data.Uid {
+		if item.GetName() == data.ProjectName || item.Spec.Uuid == data.Uid {
 			return true
 		}
 	}
@@ -60,8 +60,7 @@ func addInstance(conciliator *operatools.Conciliator, body []byte) (*utils.SpecP
 	}
 
 	newPending.Spec.Charts = data.Charts
-	newPending.Spec.ProjectName = data.ProjectName
-	newPending.Spec.Uid = data.Uid
+	newPending.Spec.Uuid = data.Uid
 
 	if err := conciliator.Client.Create(conciliator.Ctx, &newPending); err != nil {
 		return nil, err

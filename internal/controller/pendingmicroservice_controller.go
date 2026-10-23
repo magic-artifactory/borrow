@@ -18,6 +18,10 @@ package controller
 
 import (
 	"context"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -65,10 +69,46 @@ func (r *PendingMicroserviceReconciler) SetupWithManager(mgr ctrl.Manager) error
 		Complete(r)
 }
 
+func (r *PendingMicroserviceReconciler) processPendingMS(conciliator *operatools.Conciliator, pendingMs *brwv1alpha1.PendingMicroservice) error {
+	clientHttp := http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	response, err := clientHttp.Get(pendingMs.Spec.Charts)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err := response.Body.Close(); err != nil {
+			conciliator.Log.Error(err, "")
+		}
+	}()
+
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		body, _ := io.ReadAll(io.LimitReader(response.Body, 2048))
+		return fmt.Errorf("unexpected status %d (%s): %s",
+			response.StatusCode, http.StatusText(response.StatusCode), body)
+	}
+
+	return nil
+}
+
 func (r *PendingMicroserviceReconciler) Process(conciliator *operatools.Conciliator) error {
 	object := conciliator.Object.(*brwv1alpha1.PendingMicroservice)
 	if err := utils.ObjectNil(object); err != nil {
 		return err
+	}
+
+	if err := r.processPendingMS(conciliator, object); err != nil {
+		for range 3 {
+			if err := r.Delete(conciliator.Ctx, object); err == nil {
+				break
+			} else {
+				time.Sleep(5 * time.Second)
+				continue
+			}
+		}
 	}
 
 	return nil
