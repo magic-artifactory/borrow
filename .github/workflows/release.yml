@@ -43,7 +43,3 @@ jobs:
             GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload ${{ steps.release.outputs.tag_name }} bin/manager
-
-      - name: Publish to go.dev
-        if: ${{ steps.release.outputs.release_created }}
-        run: GOPROXY=proxy.golang.org go list -m github.com/magic-artifactory/borrow@${{ steps.release.outputs.tag_name }}
