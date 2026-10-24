@@ -47,7 +47,7 @@ func (e *Endpoints) Add(response http.ResponseWriter, req *http.Request) {
 		state = true
 		status = "add to pending..."
 
-		if err := json.NewEncoder(response).Encode(map[string]string{"creation": strconv.FormatBool(state), "status": status, "uuid": pendingInstance.Uid}); err != nil {
+		if err := json.NewEncoder(response).Encode(map[string]string{"creation": strconv.FormatBool(state), "status": status, "uuid": pendingInstance.Uuid}); err != nil {
 			internalServerError(response, err)
 		}
 	} else {

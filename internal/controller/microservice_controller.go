@@ -19,7 +19,9 @@ package controller
 import (
 	"context"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -37,8 +39,7 @@ type MicroserviceReconciler struct {
 // +kubebuilder:rbac:groups=brw.soigneux.works,resources=microservices,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=brw.soigneux.works,resources=microservices/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=brw.soigneux.works,resources=microservices/finalizers,verbs=update
-// +kubebuilder:rbac:groups=brw.soigneux.works,resources=pendingmicroservices,verbs=get;list;watch
-// +kubebuilder:rbac:groups=brw.soigneux.works,resources=pendingmicroservices/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=brw.soigneux.works,resources=pendingmicroservices,verbs=get;list;watch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -67,48 +68,25 @@ func (r *MicroserviceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-// func (r *MicroserviceReconciler) ProcessPendingMs(conciliator *operatools.Conciliator, pendingObject *brwv1alpha1.PendingMicroservice) error {
-// 	var req = &http.Client{Timeout: 10 * time.Second}
-// 	patch := pendingObject.DeepCopy()
-
-// 	done := make(map[string]bool)
-// 	for _, res := range slices.Clone(pendingObject.Status.Resources) {
-// 		resp, err := req.Get(res.Charts)
-// 		fmt.Println(res.Charts)
-// 		if err != nil {
-// 			continue
-// 		}
-// 		resp.Body.Close()
-// 		done[res.Uid] = true
-// 	}
-
-// 	if len(done) == 0 {
-// 		return nil
-// 	}
-
-// 	pendingObject.Status.Resources = slices.DeleteFunc(pendingObject.Status.Resources, func(res utils.PendingResource) bool {
-// 		return done[res.Uid]
-// 	})
-
-// 	return operatools.PatchStatusResource(conciliator.Ctx, conciliator.Client, pendingObject, patch)
-// }
-
 func (r *MicroserviceReconciler) Process(conciliator *operatools.Conciliator) error {
-	msObject := conciliator.Object.(*brwv1alpha1.Microservice)
-	if err := utils.ObjectNil(msObject); err != nil {
+	object := conciliator.Object.(*brwv1alpha1.Microservice)
+	if err := utils.ObjectNil(object); err != nil {
 		return err
 	}
 
-	// var pendingList brwv1alpha1.PendingMicroserviceList
-	// if err := r.Client.List(conciliator.Ctx, &pendingList, client.InNamespace(msObject.GetNamespace())); err != nil {
-	// 	return nil
-	// }
+	pendingObject := brwv1alpha1.PendingMicroservice{}
 
-	// for _, pendingItem := range pendingList.Items {
-	// 	if err := r.ProcessPendingMs(conciliator, &pendingItem); err != nil {
-	// 		return err
-	// 	}
-	// }
+	if err := r.Get(conciliator.Ctx, types.NamespacedName{
+		Name:      object.GetName(),
+		Namespace: object.GetNamespace(),
+	}, &pendingObject); err != nil {
+		return err
+	}
+
+	if err := r.Delete(conciliator.Ctx, &pendingObject,
+		client.PropagationPolicy(metav1.DeletePropagationOrphan)); err != nil {
+		return err
+	}
 
 	return nil
 }
