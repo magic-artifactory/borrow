@@ -39,7 +39,7 @@ type PendingMicroserviceStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:categories:brw;all;brw-pending;pending-ms // TODO: FIX CATEGORIES DOESN'T WORK
+// +kubebuilder:resource:categories=brw;all;brw-pending;pending-ms
 // +kubebuilder:printcolumn:name="UUID",type="string",JSONPath=".spec.uuid",description="UUID"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 

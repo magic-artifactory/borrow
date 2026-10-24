@@ -8,6 +8,11 @@ metadata:
 spec:
   group: brw.soigneux.works
   names:
+    categories:
+    - brw
+    - all
+    - brw-ms
+    - ms
     kind: Microservice
     listKind: MicroserviceList
     plural: microservices

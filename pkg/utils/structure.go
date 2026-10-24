@@ -3,7 +3,7 @@ package utils
 type SpecPendingResource struct {
 	Charts      string `json:"charts_url"`
 	ProjectName string `json:"project_name"`
-	Uid         string `json:"uid"`
+	Uuid        string `json:"uuid"`
 }
 
 type ResourceSpec struct {

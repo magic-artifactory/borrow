@@ -8,6 +8,11 @@ metadata:
 spec:
   group: brw.soigneux.works
   names:
+    categories:
+    - brw
+    - all
+    - brw-pending
+    - pending-ms
     kind: PendingMicroservice
     listKind: PendingMicroserviceList
     plural: pendingmicroservices
