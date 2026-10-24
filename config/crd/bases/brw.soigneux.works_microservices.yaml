@@ -8,6 +8,11 @@ metadata:
 spec:
   group: brw.soigneux.works
   names:
+    categories:
+    - brw
+    - all
+    - brw-ms
+    - ms
     kind: Microservice
     listKind: MicroserviceList
     plural: microservices
@@ -39,10 +44,19 @@ spec:
           spec:
             description: MicroserviceSpec defines the desired state of Microservice.
             properties:
-              foo:
-                description: Foo is an example field of Microservice. Edit microservice_types.go
-                  to remove/update
+              charts_url:
+                description: |-
+                  INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file
                 type: string
+              project_name:
+                type: string
+              uid:
+                type: string
+            required:
+            - charts_url
+            - project_name
+            - uid
             type: object
           status:
             description: MicroserviceStatus defines the observed state of Microservice.

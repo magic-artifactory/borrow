@@ -1,5 +1,5 @@
 /*
-Copyright 2026 lukas-sgx.
+Copyright 2026 magic-artifactory.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,8 +37,9 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	brwv1alpha1 "github.com/lukas-sgx/borrow/api/v1alpha1"
-	"github.com/lukas-sgx/borrow/internal/controller"
+	brwv1alpha1 "github.com/magic-artifactory/borrow/api/v1alpha1"
+	"github.com/magic-artifactory/borrow/internal/api"
+	"github.com/magic-artifactory/borrow/internal/controller"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -56,6 +57,7 @@ func init() {
 
 // nolint:gocyclo
 func main() {
+	var apiAddr string
 	var metricsAddr string
 	var metricsCertPath, metricsCertName, metricsCertKey string
 	var webhookCertPath, webhookCertName, webhookCertKey string
@@ -64,6 +66,8 @@ func main() {
 	var secureMetrics bool
 	var enableHTTP2 bool
 	var tlsOpts []func(*tls.Config)
+	flag.StringVar(&apiAddr, "api-bind-address", ":9080", "The address the api endpoint binds to. "+
+		"Use :9443 for HTTPS or :9080 for HTTP.")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", "0", "The address the metrics endpoint binds to. "+
 		"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
@@ -209,6 +213,13 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Microservice")
 		os.Exit(1)
 	}
+	if err := (&controller.PendingMicroserviceReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "PendingMicroservice")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if metricsCertWatcher != nil {
@@ -233,6 +244,11 @@ func main() {
 	}
 	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up ready check")
+		os.Exit(1)
+	}
+
+	if err := mgr.Add(api.NewServer(apiAddr, mgr.GetClient())); err != nil {
+		setupLog.Error(err, "unable to add API server")
 		os.Exit(1)
 	}
 

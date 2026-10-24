@@ -1,0 +1,74 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.18.0
+  name: pendingmicroservices.brw.soigneux.works
+spec:
+  group: brw.soigneux.works
+  names:
+    categories:
+    - brw
+    - all
+    - brw-pending
+    - pending-ms
+    kind: PendingMicroservice
+    listKind: PendingMicroserviceList
+    plural: pendingmicroservices
+    singular: pendingmicroservice
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: UUID
+      jsonPath: .spec.uuid
+      name: UUID
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: PendingMicroservice is the Schema for the pendingmicroservices
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PendingMicroserviceSpec defines the desired state of PendingMicroservice.
+            properties:
+              charts_url:
+                description: |-
+                  INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file
+                type: string
+              uuid:
+                type: string
+            required:
+            - charts_url
+            - uuid
+            type: object
+          status:
+            description: PendingMicroserviceStatus defines the observed state of PendingMicroservice.
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

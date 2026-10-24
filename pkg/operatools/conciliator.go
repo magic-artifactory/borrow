@@ -1,13 +1,24 @@
 package operatools
 
-import "github.com/go-logr/logr"
+import (
+	"context"
+
+	"github.com/go-logr/logr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+)
 
 type Conciliator struct {
-	Log logr.Logger
+	Log    logr.Logger
+	Object client.Object
+	Client client.Client
+	Ctx    context.Context
 }
 
-// func newConciliator(log logr.Logger) *Conciliator {
-// 	return &Conciliator{
-// 		Log: log,
-// 	}
-// }
+func NewConciliator(log logr.Logger, object client.Object, c client.Client, ctx context.Context) *Conciliator {
+	return &Conciliator{
+		Log:    log,
+		Object: object,
+		Client: c,
+		Ctx:    ctx,
+	}
+}
