@@ -8,6 +8,7 @@ rules:
   - brw.soigneux.works
   resources:
   - microservices
+  - pendingmicroservices
   verbs:
   - create
   - delete
@@ -20,12 +21,14 @@ rules:
   - brw.soigneux.works
   resources:
   - microservices/finalizers
+  - pendingmicroservices/finalizers
   verbs:
   - update
 - apiGroups:
   - brw.soigneux.works
   resources:
   - microservices/status
+  - pendingmicroservices/status
   verbs:
   - get
   - patch

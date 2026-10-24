@@ -1,9 +1,7 @@
 package instances
 
 import (
-	"slices"
-
-	"github.com/lukas-sgx/borrow/api/v1alpha1"
+	"github.com/magic-artifactory/borrow/api/v1alpha1"
 )
 
 type Instance struct {
@@ -11,15 +9,13 @@ type Instance struct {
 	Namespace string `json:"namespace"`
 }
 
-func isInstanceExist(mslist []string, name string) bool {
-	return slices.Contains(mslist, name)
-}
-
-func getInstanceInfo(Microservice *v1alpha1.Microservice, name string) *Instance {
-	if isInstanceExist(Microservice.Status.MsList, name) {
-		return &Instance{
-			Name:      name,
-			Namespace: "sre-system",
+func getInstanceInfo(MsList *v1alpha1.MicroserviceList, uid string) *Instance {
+	for _, ms := range MsList.Items {
+		if ms.Spec.Uid == uid {
+			return &Instance{
+				Name:      ms.GetName(),
+				Namespace: ms.GetNamespace(),
+			}
 		}
 	}
 

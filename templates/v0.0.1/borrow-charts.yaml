@@ -3,8 +3,7 @@ kind: Microservice
 metadata:
   labels:
     app.kubernetes.io/name: borrow
-    app.kubernetes.io/managed-by: kustomize
-  name: microservice-sample
+  name: borrow
   namespace: sre-system
 spec:
   # TODO(user): Add fields here
