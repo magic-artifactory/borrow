@@ -8,13 +8,26 @@ metadata:
 spec:
   group: brw.soigneux.works
   names:
+    categories:
+    - brw
+    - all
+    - brw-pending
+    - pending-ms
     kind: PendingMicroservice
     listKind: PendingMicroserviceList
     plural: pendingmicroservices
     singular: pendingmicroservice
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: UUID
+      jsonPath: .spec.uuid
+      name: UUID
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: PendingMicroservice is the Schema for the pendingmicroservices
@@ -45,14 +58,11 @@ spec:
                   INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                   Important: Run "make" to regenerate code after modifying this file
                 type: string
-              project_name:
-                type: string
-              uid:
+              uuid:
                 type: string
             required:
             - charts_url
-            - project_name
-            - uid
+            - uuid
             type: object
           status:
             description: PendingMicroserviceStatus defines the observed state of PendingMicroservice.

@@ -42,6 +42,7 @@ type MicroserviceStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:resource:categories=brw;all;brw-ms;ms
 
 // Microservice is the Schema for the microservices API.
 type Microservice struct {

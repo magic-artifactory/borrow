@@ -27,9 +27,8 @@ import (
 type PendingMicroserviceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Charts      string `json:"charts_url"`
-	ProjectName string `json:"project_name"`
-	Uid         string `json:"uid"`
+	Charts string `json:"charts_url"`
+	Uuid   string `json:"uuid"`
 }
 
 // PendingMicroserviceStatus defines the observed state of PendingMicroservice.
@@ -40,6 +39,9 @@ type PendingMicroserviceStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:resource:categories=brw;all;brw-pending;pending-ms
+// +kubebuilder:printcolumn:name="UUID",type="string",JSONPath=".spec.uuid",description="UUID"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
 // PendingMicroservice is the Schema for the pendingmicroservices API.
 type PendingMicroservice struct {
