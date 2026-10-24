@@ -1,0 +1,66 @@
+# Changelog
+
+## 0.0.1 (2026-10-24)
+
+
+* release 0.0.1 ([3788f34](https://github.com/magic-artifactory/borrow/commit/3788f342cbcd1b0aad2f933ad5f927686f4db350))
+
+
+### New APIs / Features
+
+* add add del get endpoints for instances ([dd0930b](https://github.com/magic-artifactory/borrow/commit/dd0930b809a523e19548a851b7e82271a1baf085))
+* add Apache License 2.0 ([63531c5](https://github.com/magic-artifactory/borrow/commit/63531c58efb2d37e6f078dd436fa8ee1e18bc598))
+* add api server ([64f8b20](https://github.com/magic-artifactory/borrow/commit/64f8b209c502972b3761eff4868e227430da32e9))
+* add auto delete from pending when chart is unavailable after several retries ([1657993](https://github.com/magic-artifactory/borrow/commit/1657993d855f4991cccf072c9e9ec536e7b8ebaf))
+* add basic templates ([36adad3](https://github.com/magic-artifactory/borrow/commit/36adad3fd083032a957fc315f8f625d44b2391fd))
+* add build & environments ([53a5a9c](https://github.com/magic-artifactory/borrow/commit/53a5a9c640fe28355c21fb4f0a77e89f4ce2e34b))
+* add check duplicate on ms ([0b2734b](https://github.com/magic-artifactory/borrow/commit/0b2734bad5019cd5514c260349c510a0d5d7f0cc))
+* add codeowners ([097ab83](https://github.com/magic-artifactory/borrow/commit/097ab838bcf70569dd2997a52b55fdaff2d9c187))
+* add conciliator ([8155b2f](https://github.com/magic-artifactory/borrow/commit/8155b2f1c016cd7e3def6da86ca202de59a5d93a))
+* add contributing ([2b7fd8b](https://github.com/magic-artifactory/borrow/commit/2b7fd8bd2f4cc5ab8b58b241f29b78840cbd09d1))
+* add debug bin ([ffab391](https://github.com/magic-artifactory/borrow/commit/ffab39125e886e79e487e1e3efd5165358d03ffe))
+* add deletion of pending object if charts unreachable ([c802133](https://github.com/magic-artifactory/borrow/commit/c802133e7f213d72f43a91eb94ef7414d9ff5dfd))
+* add dependabot ([c955b1e](https://github.com/magic-artifactory/borrow/commit/c955b1e8d6c330f1e391c899387125d8ff05e7f4))
+* add docker release ([3054c86](https://github.com/magic-artifactory/borrow/commit/3054c8680756cd9af2f0084b6f462fad81e596e9))
+* add go mod dependabot ([508d464](https://github.com/magic-artifactory/borrow/commit/508d464e4aab74b64add906253896362af1ed048))
+* add instance endpoints ([3793488](https://github.com/magic-artifactory/borrow/commit/379348868e2a2804e0b052d4d242a2daa88109d4))
+* add issue templates ([37c6a1c](https://github.com/magic-artifactory/borrow/commit/37c6a1ce8fe86f0b01dc7dd84978fae48c3b017b))
+* add log on processing ([b1f9534](https://github.com/magic-artifactory/borrow/commit/b1f953430e603dd75677c704460fbbce2cc99d3b))
+* add no diff on vendor ([a6ac6b0](https://github.com/magic-artifactory/borrow/commit/a6ac6b0a18e64164f864e8bce4f0f7697d82b5cd))
+* add object check ([13ec270](https://github.com/magic-artifactory/borrow/commit/13ec270c70b174f22b655c239fea458981a651ab))
+* add operatortools ([20bb7f4](https://github.com/magic-artifactory/borrow/commit/20bb7f45ea6c89a7bdc984c6bcd933afb8bec3ec))
+* add pending microservices ([c328680](https://github.com/magic-artifactory/borrow/commit/c328680b5851c980bd86b3b2f85cc043f8f9ff5d))
+* add publish to go.dev ([68b05c7](https://github.com/magic-artifactory/borrow/commit/68b05c75999b840e097f1b1d332eef4437099f0a))
+* add release please config ([4736c81](https://github.com/magic-artifactory/borrow/commit/4736c81a981ad44a538f553677472af64ef363e8))
+* add runner ([70f4c0b](https://github.com/magic-artifactory/borrow/commit/70f4c0b1c02bc43b9e2a71a31f405b62088fb7dd))
+* **ci-cd:** add ci & release ([32e3794](https://github.com/magic-artifactory/borrow/commit/32e37942615c525e4f595e58086d68dd567c7c6e))
+* **ci:** add security audit ([79b9197](https://github.com/magic-artifactory/borrow/commit/79b919784dbf1c24d6a8795fc422f7ed92157cd6))
+* setup project ([7e6569f](https://github.com/magic-artifactory/borrow/commit/7e6569fe46c3988d61b52095e86dec9316831617))
+* switch to pending MS list on CRD ([78dd0e3](https://github.com/magic-artifactory/borrow/commit/78dd0e360612c386a370b8aad72d65b62c0b3713))
+* **test:** add pendingMs to reconciler of Ms ([137aed8](https://github.com/magic-artifactory/borrow/commit/137aed8585c982cc00f92f1cbf694dd494e26035))
+
+
+### Bug Fixes
+
+* **ci-cd:** release only triggered by ci ([1a8732d](https://github.com/magic-artifactory/borrow/commit/1a8732df8a1d664efb520352d78527fa9eb1a730))
+* **ci-cd:** use actions instead of install govulncheck ([f26a9d3](https://github.com/magic-artifactory/borrow/commit/f26a9d3b0e4e9bd25e81eba80d3327899e65e99b))
+* comment conciliator ([0430d51](https://github.com/magic-artifactory/borrow/commit/0430d51a86a49eea9fc3215563ac8e249249778b))
+* comment e2e tests ([a58e4e0](https://github.com/magic-artifactory/borrow/commit/a58e4e0b957659793e2e5e5f54d4323272dba169))
+* correct resource category syntax and update UUID field naming ([9cc22c0](https://github.com/magic-artifactory/borrow/commit/9cc22c09e268aea2c0988a00fe9d8baddbf194e6))
+* resolve needed jobs ([166c504](https://github.com/magic-artifactory/borrow/commit/166c504d294a242a2085148189616dde2672493d))
+* resolve needed jobs ([97aac92](https://github.com/magic-artifactory/borrow/commit/97aac92a9f5daee26797e59e617abcd12fdaa754))
+* run everyday ([65e10fe](https://github.com/magic-artifactory/borrow/commit/65e10fe7d53e4d34efe4ed29b45daf9aeac0c434))
+* set all tests in ci ([fd701ca](https://github.com/magic-artifactory/borrow/commit/fd701caf0dbe59b4a81f7683146ec7c81a7335f6))
+* set latest linter version ([67eb96d](https://github.com/magic-artifactory/borrow/commit/67eb96d72aa9de77d06a7b7ebaeffa0d56a6e489))
+* **test:** resolve issue on test-e2e ([e4ca3f0](https://github.com/magic-artifactory/borrow/commit/e4ca3f084c996644cb78a4ce8550f5fa351f3e8a))
+* typo ([7713f77](https://github.com/magic-artifactory/borrow/commit/7713f770253ec2691e4ff0c71a4f42f5dc8da852))
+* typo ([ed1ac7b](https://github.com/magic-artifactory/borrow/commit/ed1ac7b6953c90f737ce077986edc86b230c4e94))
+* update github token ([97f672d](https://github.com/magic-artifactory/borrow/commit/97f672da488c19578a17f50c5b7613e9d94e2bd9))
+* update go image to 1.27.3 ([b6bc5cb](https://github.com/magic-artifactory/borrow/commit/b6bc5cb9b8a5e9dd4935cb010a47a87c12e4e57e))
+* update repo owner ([88df823](https://github.com/magic-artifactory/borrow/commit/88df8235ebc7d91988955edd89b154fcf3f20c2a))
+* update UUID handling in microservice and pending microservice logic ([5f2df38](https://github.com/magic-artifactory/borrow/commit/5f2df380d2898b7d904c09c0d395229a357d2cf6))
+* use default namespace ([c57056c](https://github.com/magic-artifactory/borrow/commit/c57056ccbb1f9fad46350fae138af06ba4ff717c))
+* use microservice spec to get instance endpoint ([8d0bed2](https://github.com/magic-artifactory/borrow/commit/8d0bed23156540c23672257e52138baa6fcf5492))
+* use sre-system namespace ([60dd124](https://github.com/magic-artifactory/borrow/commit/60dd1242944fc55f21bc15d1cc9f7748b564ed75))
+* use vendor instead of download ([463a0fe](https://github.com/magic-artifactory/borrow/commit/463a0fe799e580ca7d92845e8197d82173e0a2f4))
+* wrong head & base branch ([47700e7](https://github.com/magic-artifactory/borrow/commit/47700e7a280a5da6f31601c5a67e5f67743431b8))
