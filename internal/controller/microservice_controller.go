@@ -20,6 +20,7 @@ import (
 	"context"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -68,17 +69,12 @@ func (r *MicroserviceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *MicroserviceReconciler) Process(conciliator *operatools.Conciliator) error {
-	object := conciliator.Object.(*brwv1alpha1.Microservice)
-	if err := utils.ObjectNil(object); err != nil {
-		return err
-	}
-
+func (r *MicroserviceReconciler) deleteParentPendingMs(conciliator *operatools.Conciliator, ms *brwv1alpha1.Microservice) error {
 	pendingObject := brwv1alpha1.PendingMicroservice{}
 
 	if err := r.Get(conciliator.Ctx, types.NamespacedName{
-		Name:      object.GetName(),
-		Namespace: object.GetNamespace(),
+		Name:      ms.GetName(),
+		Namespace: ms.GetNamespace(),
 	}, &pendingObject); err != nil {
 		return err
 	}
@@ -87,6 +83,22 @@ func (r *MicroserviceReconciler) Process(conciliator *operatools.Conciliator) er
 		client.PropagationPolicy(metav1.DeletePropagationOrphan)); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (r *MicroserviceReconciler) Process(conciliator *operatools.Conciliator) error {
+	object := conciliator.Object.(*brwv1alpha1.Microservice)
+	if err := utils.ObjectNil(object); err != nil {
+		return err
+	}
+
+	if err := r.deleteParentPendingMs(conciliator, object);
+		err != nil && !apierrors.IsNotFound(err) {
+		return err
+	}
+
+	// fmt.Println(object)
 
 	return nil
 }
