@@ -283,7 +283,7 @@ set -e; \
 package=$(2)@$(3) ;\
 echo "Downloading $${package}" ;\
 rm -f $(1) || true ;\
-GOBIN=$(LOCALBIN) go install $${package} ;\
+CGO_ENABLED=0 GOBIN=$(LOCALBIN) go install $${package} ;\
 mv $(1) $(1)-$(3) ;\
 } ;\
 ln -sf $(1)-$(3) $(1)
@@ -363,16 +363,10 @@ catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)	
 
 .PHONY: local
-local: kind ## create kubernetes cluster
-	kind create cluster
-	kubectl create ns sre-system
+local: ## create kubernetes cluster
+	$(KIND) create cluster
+	$(KUBECTL) create ns sre-system
 
 .PHONY: kind-delete
 kind-delete: ## delete kind cluster
-	kind delete cluster
-
-
-.PHONY: kind-create
-kind: ## download kind bin
-	go install sigs.k8s.io/kind@v0.33.0
-	GOFLAGS="-mod=mod" go install sigs.k8s.io/kustomize/kustomize/v5@latest
+	$(KIND) delete cluster
