@@ -9,5 +9,11 @@ hooks = [
     { id = "end-of-file-fixer" },
     { id = "check-added-large-files" },
     { id = "check-merge-conflict" },
-    { id = "check-signed-commit" },
+]
+
+[[repos]]
+repo = "https://github.com/tekwizely/pre-commit-golang"
+rev = "v1.0.0-rc.4"
+hooks = [
+    { id = "go-fmt-repo" },
 ]
