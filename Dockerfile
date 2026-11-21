@@ -11,7 +11,6 @@ COPY vendor/ vendor/
 
 # Copy the go source
 COPY cmd/main.go cmd/main.go
-COPY api/ api/
 COPY internal/ internal/
 COPY pkg/ pkg/
 
