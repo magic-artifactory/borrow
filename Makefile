@@ -94,7 +94,7 @@ help: ## Display this help.
 
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) rbac:roleName=borrow-manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
@@ -360,7 +360,7 @@ catalog-build: opm ## Build a catalog image.
 # Push the catalog image.
 .PHONY: catalog-push
 catalog-push: ## Push a catalog image.
-	$(MAKE) docker-push IMG=$(CATALOG_IMG)	
+	$(MAKE) docker-push IMG=$(CATALOG_IMG)
 
 .PHONY: local
 local: ## create kubernetes cluster
