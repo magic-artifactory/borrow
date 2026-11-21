@@ -37,10 +37,9 @@ func Reconcile(r Reconciler, c client.Client, req ctrl.Request,
 }
 
 func PatchStatusResource(ctx context.Context, c client.Client, obj client.Object, patch client.Object) error {
-	mergePatch := client.MergeFrom(patch)
+	return c.Status().Patch(ctx, obj, client.MergeFrom(patch))
+}
 
-	if err := c.Status().Patch(ctx, obj, mergePatch); err != nil {
-		return err
-	}
-	return nil
+func PatchResource(ctx context.Context, c client.Client, obj client.Object, patch client.Object) error {
+	return c.Patch(ctx, obj, client.MergeFrom(patch))
 }
