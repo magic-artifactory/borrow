@@ -71,7 +71,10 @@ jobs:
           git push origin "$tag"
 
   open_pull_request:
-    if: (github.ref_name == 'develop' || github.ref_name == 'main') && github.event_name == 'push'
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          (github.event.workflow_run.head_branch == 'develop' ||
+           github.event.workflow_run.head_branch == 'main') }}
     needs:
       - tag
     runs-on: ubuntu-latest
@@ -80,11 +83,16 @@ jobs:
       contents: read
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      HEAD_BRANCH: ${{ github.ref_name }}
+      HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Fetch pull request branches
+        run: |
+          git fetch origin develop main stable
 
       - name: Resolve target branch and check diff
         id: target
