@@ -71,8 +71,6 @@ func (r *MicroserviceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *MicroserviceReconciler) addDeployment(conciliator *operatools.Conciliator, ms *brwv1alpha1.Microservice) error {
-	const defaultImage = "registry.k8s.io/pause:3.10"
-
 	image := ms.Spec.Image
 
 	replicas := int32(1)
