@@ -28,6 +28,8 @@ import (
 	brwv1alpha1 "github.com/magic-artifactory/borrow/api/v1alpha1"
 	"github.com/magic-artifactory/borrow/pkg/operatools"
 	"github.com/magic-artifactory/borrow/pkg/utils"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // MicroserviceReconciler reconciles a Microservice object
@@ -68,17 +70,54 @@ func (r *MicroserviceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *MicroserviceReconciler) deletePendingObject(conciliator *operatools.Conciliator, ms *brwv1alpha1.Microservice) error {
-	pendingObject := brwv1alpha1.PendingMicroservice{
-		Name:      ms.GetName(),
-		Namespace: ms.GetNamespace(),
+func (r *MicroserviceReconciler) addDeployment(conciliator *operatools.Conciliator, ms *brwv1alpha1.Microservice) error {
+	const defaultImage = "registry.k8s.io/pause:3.10"
+
+	image := ms.Spec.Image
+
+	replicas := int32(1)
+	if ms.Spec.Replicas != nil {
+		replicas = *ms.Spec.Replicas
 	}
 
-	if err := r.Delete(conciliator.Ctx, &pendingObject,
-		client.PropagationPolicy(metav1.DeletePropagationOrphan)); err != nil {
-		if !apierrors.IsNotFound(err) {
-			return err
+	labels := map[string]string{
+		"app.kubernetes.io/name": ms.GetName(),
+	}
+
+	deploy := appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      ms.GetName(),
+			Namespace: ms.GetNamespace(),
+			Labels:    labels,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: labels,
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: labels,
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  ms.GetName(),
+							Image: image,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := r.Create(conciliator.Ctx, &deploy); err != nil {
+		if apierrors.IsAlreadyExists(err) {
+			if err := r.Update(conciliator.Ctx, &deploy); err != nil {
+				return err
+			}
 		}
+		return err
 	}
 
 	return nil
@@ -90,7 +129,7 @@ func (r *MicroserviceReconciler) Process(conciliator *operatools.Conciliator) er
 		return err
 	}
 
-	if err := r.deletePendingObject(conciliator, ms); err != nil {
+	if err := r.addDeployment(conciliator, ms); err != nil {
 		return err
 	}
 
