@@ -8,8 +8,8 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: manager-role
+  name: borrow-manager-role
 subjects:
 - kind: ServiceAccount
-  name: controller-manager
+  name: borrow
   namespace: sre-system

@@ -27,9 +27,15 @@ import (
 type MicroserviceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Charts      string `json:"charts_url"`
-	ProjectName string `json:"project_name"`
-	Uid         string `json:"uid"`
+
+	// Image is the container image used by the Microservice pod.
+	// +kubebuilder:default="registry.k8s.io/pause:3.10"
+	Image string `json:"image,omitempty"`
+
+	// Replicas is the number of pod replicas.
+	// +kubebuilder:default=1
+	// +kubebuilder:validation:Minimum=0
+	Replicas *int32 `json:"replicas,omitempty"`
 }
 
 // MicroserviceStatus defines the observed state of Microservice.
@@ -37,7 +43,7 @@ type MicroserviceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Spec utils.ResourceSpec `json:"spec"`
+	Service metav1.Condition `json:"service,omitempty"`
 }
 
 // +kubebuilder:object:root=true

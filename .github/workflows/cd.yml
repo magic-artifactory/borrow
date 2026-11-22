@@ -1,0 +1,133 @@
+name: CD release
+
+on:
+  workflow_run:
+    workflows: ["borrow - CI"]
+    types: [completed]
+    branches: [develop, stable, master, main]
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out tested commit
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Create branch tag
+        env:
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          gh auth setup-git
+          git fetch --prune --prune-tags --force origin
+
+          latest_version="$(
+            git ls-remote --refs --tags origin |
+              awk '{print $2}' |
+              sed 's#^refs/tags/##' |
+              grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' |
+              sort -V |
+              tail -n 1 || true
+          )"
+          latest_version="${latest_version:-v0.0.0}"
+          version="${latest_version#v}"
+          IFS=. read -r major minor patch <<< "$version"
+          next_version="v${major}.${minor}.$((patch + 1))"
+          short_sha="${SHA::7}"
+
+          case "$BRANCH" in
+            develop)
+              tag="${next_version}-alpha.${short_sha}"
+              ;;
+            master|main)
+              tag="${next_version}-beta.${short_sha}"
+              ;;
+            stable)
+              tag="$next_version"
+              ;;
+            *)
+              echo "Unsupported release branch: $BRANCH" >&2
+              exit 1
+              ;;
+          esac
+
+          if git ls-remote --exit-code --refs origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "Tag $tag already exists; nothing to do."
+            exit 0
+          fi
+
+          git tag "$tag" "$SHA"
+          git push origin "$tag"
+
+  open_pull_request:
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          (github.event.workflow_run.head_branch == 'develop' ||
+           github.event.workflow_run.head_branch == 'main') }}
+    needs:
+      - tag
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Fetch pull request branches
+        run: |
+          git fetch origin develop main stable
+
+      - name: Resolve target branch and check diff
+        id: target
+        run: |
+          case "$HEAD_BRANCH" in
+            develop) BASE_BRANCH="main" ;;
+            main)    BASE_BRANCH="stable" ;;
+            *) echo "Unsupported branch: $HEAD_BRANCH"; exit 1 ;;
+          esac
+
+          AHEAD_COMMITS=$(gh api "repos/${{ github.repository }}/compare/${BASE_BRANCH}...${HEAD_BRANCH}" --jq '.ahead_by')
+
+          echo "base=${BASE_BRANCH}" >> "$GITHUB_OUTPUT"
+          if [ "$AHEAD_COMMITS" -gt 0 ]; then
+            echo "has_diff=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_diff=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or update PR
+        if: steps.target.outputs.has_diff == 'true'
+        env:
+          BASE_BRANCH: ${{ steps.target.outputs.base }}
+        run: |
+          COMMITS_LIST="### List of changes:"$'\n'
+          COMMITS_LIST+="$(git log "origin/${BASE_BRANCH}..HEAD" --pretty=format:'- %s (%h)')"
+
+          PR_NUMBER=$(gh pr list --head "$HEAD_BRANCH" --base "$BASE_BRANCH" --state open --json number -q '.[0].number')
+
+          if [ -n "$PR_NUMBER" ]; then
+            gh pr edit "$PR_NUMBER" --body "$COMMITS_LIST"
+          else
+            gh pr create \
+              --title "merge: ${HEAD_BRANCH} -> ${BASE_BRANCH}" \
+              --body "$COMMITS_LIST" \
+              --base "$BASE_BRANCH" \
+              --head "$HEAD_BRANCH"
+          fi

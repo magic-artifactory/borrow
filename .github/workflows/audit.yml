@@ -2,10 +2,10 @@ name: Security Audit
 
 on:
   push:
-    paths: 
+    paths:
       - 'vendor/**'
   pull_request:
-    paths: 
+    paths:
       - 'vendor/**'
   schedule:
     - cron: '0 0 * * *'

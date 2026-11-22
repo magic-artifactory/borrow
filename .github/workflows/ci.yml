@@ -8,9 +8,6 @@ on:
     branches-ignore:
       - "no-ga/**"
 
-permissions:
-  contents: read
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -34,7 +31,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
-      
+
       - name: Build
         run: make
 
@@ -87,58 +84,3 @@ jobs:
         run: |
           go mod tidy
           make test-e2e
-
-
-  open_pull_request:
-    if: (github.ref_name == 'develop' || github.ref_name == 'main') && github.event_name == 'push'
-    needs:
-      - test-e2e
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: read
-    env:
-      GH_TOKEN: ${{ github.token }}
-      HEAD_BRANCH: ${{ github.ref_name }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Resolve target branch and check diff
-        id: target
-        run: |
-          case "$HEAD_BRANCH" in
-            develop) BASE_BRANCH="main" ;;
-            main)    BASE_BRANCH="staging" ;;
-            *) echo "Unsupported branch: $HEAD_BRANCH"; exit 1 ;;
-          esac
-
-          AHEAD_COMMITS=$(gh api "repos/${{ github.repository }}/compare/${BASE_BRANCH}...${HEAD_BRANCH}" --jq '.ahead_by')
-
-          echo "base=${BASE_BRANCH}" >> "$GITHUB_OUTPUT"
-          if [ "$AHEAD_COMMITS" -gt 0 ]; then
-            echo "has_diff=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_diff=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create or update PR
-        if: steps.target.outputs.has_diff == 'true'
-        env:
-          BASE_BRANCH: ${{ steps.target.outputs.base }}
-        run: |
-          COMMITS_LIST="### List of changes:"$'\n'
-          COMMITS_LIST+="$(git log "origin/${BASE_BRANCH}..HEAD" --pretty=format:'- %s (%h)')"
-
-          PR_NUMBER=$(gh pr list --head "$HEAD_BRANCH" --base "$BASE_BRANCH" --state open --json number -q '.[0].number')
-
-          if [ -n "$PR_NUMBER" ]; then
-            gh pr edit "$PR_NUMBER" --body "$COMMITS_LIST"
-          else
-            gh pr create \
-              --title "merge: ${HEAD_BRANCH} -> ${BASE_BRANCH}" \
-              --body "$COMMITS_LIST" \
-              --base "$BASE_BRANCH" \
-              --head "$HEAD_BRANCH"
-          fi
