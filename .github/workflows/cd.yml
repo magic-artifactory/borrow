@@ -73,7 +73,7 @@ jobs:
   open_pull_request:
     if: (github.ref_name == 'develop' || github.ref_name == 'main') && github.event_name == 'push'
     needs:
-      - test-e2e
+      - tag
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
