@@ -46,10 +46,8 @@ spec:
             properties:
               image:
                 default: registry.k8s.io/pause:3.10
-                description: |-
-                  INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                  Important: Run "make" to regenerate code after modifying this file
-                  Image is the container image used by the Microservice pod.
+                description: Image is the container image used by the Microservice
+                  pod.
                 type: string
               replicas:
                 default: 1
