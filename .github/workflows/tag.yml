@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: ["borrow - CI"]
     types: [completed]
-    branches: [develop, staging, master, main]
+    branches: [develop, stable, master, main]
 
 jobs:
   tag:
@@ -29,8 +29,13 @@ jobs:
         run: |
           set -euo pipefail
 
+          gh auth setup-git
+          git fetch --prune --prune-tags --force origin
+
           latest_version="$(
-            git tag --list 'v*' |
+            git ls-remote --refs --tags origin |
+              awk '{print $2}' |
+              sed 's#^refs/tags/##' |
               grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' |
               sort -V |
               tail -n 1
@@ -45,10 +50,10 @@ jobs:
             develop)
               tag="${next_version}-alpha.${short_sha}"
               ;;
-            staging)
+            master|main)
               tag="${next_version}-beta.${short_sha}"
               ;;
-            master|main)
+            stable)
               tag="$next_version"
               ;;
             *)
