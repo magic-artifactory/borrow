@@ -34,13 +34,13 @@ import (
 const namespace = "sre-system"
 
 // serviceAccountName created for the project
-const serviceAccountName = "borrow-controller-manager"
+const serviceAccountName = "borrow"
 
 // metricsServiceName is the name of the metrics service of the project
-const metricsServiceName = "borrow-controller-manager-metrics-service"
+const metricsServiceName = "borrow-metrics-service"
 
 // metricsRoleBindingName is the name of the RBAC that will be created to allow get the metrics data
-const metricsRoleBindingName = "borrow-metrics-binding"
+const metricsRoleBindingName = "metrics-binding"
 
 var _ = Describe("Manager", Ordered, func() {
 	var controllerPodName string
@@ -173,7 +173,7 @@ var _ = Describe("Manager", Ordered, func() {
 		It("should ensure the metrics endpoint is serving metrics", func() {
 			By("creating a ClusterRoleBinding for the service account to allow access to metrics")
 			cmd := exec.Command("kubectl", "create", "clusterrolebinding", metricsRoleBindingName,
-				"--clusterrole=borrow-metrics-reader",
+				"--clusterrole=metrics-reader",
 				fmt.Sprintf("--serviceaccount=%s:%s", namespace, serviceAccountName),
 			)
 			_, err := utils.Run(cmd)

@@ -7,3 +7,4 @@ metadata:
   namespace: sre-system
 spec:
   # TODO(user): Add fields here
+  image: nginx

@@ -2,13 +2,12 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: manager-role
+  name: borrow-manager-role
 rules:
 - apiGroups:
   - brw.soigneux.works
   resources:
   - microservices
-  - pendingmicroservices
   verbs:
   - create
   - delete
@@ -21,15 +20,22 @@ rules:
   - brw.soigneux.works
   resources:
   - microservices/finalizers
-  - pendingmicroservices/finalizers
   verbs:
   - update
 - apiGroups:
   - brw.soigneux.works
   resources:
   - microservices/status
-  - pendingmicroservices/status
   verbs:
   - get
   - patch
   - update
+- apiGroups:
+  - brw.soigneux.works
+  resources:
+  - pendingmicroservices
+  verbs:
+  - delete
+  - get
+  - list
+  - watch

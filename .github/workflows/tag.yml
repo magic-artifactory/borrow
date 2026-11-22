@@ -1,0 +1,66 @@
+name: tag release
+
+on:
+  workflow_run:
+    workflows: ["borrow - CI"]
+    types: [completed]
+    branches: [develop, staging, master, main]
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out tested commit
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Create branch tag
+        env:
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          latest_version="$(
+            git tag --list 'v*' |
+              grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' |
+              sort -V |
+              tail -n 1
+          )"
+          latest_version="${latest_version:-v0.0.0}"
+          version="${latest_version#v}"
+          IFS=. read -r major minor patch <<< "$version"
+          next_version="v${major}.${minor}.$((patch + 1))"
+          short_sha="${SHA::7}"
+
+          case "$BRANCH" in
+            develop)
+              tag="${next_version}-alpha.${short_sha}"
+              ;;
+            staging)
+              tag="${next_version}-beta.${short_sha}"
+              ;;
+            master|main)
+              tag="$next_version"
+              ;;
+            *)
+              echo "Unsupported release branch: $BRANCH" >&2
+              exit 1
+              ;;
+          esac
+
+          if git ls-remote --exit-code --refs origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "Tag $tag already exists; nothing to do."
+            exit 0
+          fi
+
+          git tag "$tag" "$SHA"
+          git push origin "$tag"

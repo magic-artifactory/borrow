@@ -21,6 +21,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -42,26 +43,12 @@ var _ = Describe("Microservice Controller", func() {
 			Namespace: utils.NamespaceDefault, // TODO(user):Modify as needed
 		}
 		microservice := &brwv1alpha1.Microservice{}
-		pendingMicroservice := &brwv1alpha1.PendingMicroservice{}
 
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind Microservice")
 			err := k8sClient.Get(ctx, typeNamespacedName, microservice)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &brwv1alpha1.Microservice{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      resourceName,
-						Namespace: utils.NamespaceDefault,
-					},
-					// TODO(user): Specify other spec details if needed.
-				}
-				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
-			}
-
-			By("creating the custom resource for the Kind PendingMicroservice")
-			err = k8sClient.Get(ctx, typeNamespacedName, pendingMicroservice)
-			if err != nil && errors.IsNotFound(err) {
-				resource := &brwv1alpha1.PendingMicroservice{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: utils.NamespaceDefault,
@@ -92,8 +79,21 @@ var _ = Describe("Microservice Controller", func() {
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
-			// Example: If you expect a certain status condition after reconciliation, verify it here.
+
+			deployment := &appsv1.Deployment{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, deployment)).To(Succeed())
+			Expect(deployment.Spec.Selector.MatchLabels).To(HaveKeyWithValue(
+				"app.kubernetes.io/name",
+				resourceName,
+			))
+			Expect(deployment.Spec.Template.Labels).To(HaveKeyWithValue(
+				"app.kubernetes.io/name",
+				resourceName,
+			))
+			Expect(deployment.Spec.Template.Spec.Containers).To(HaveLen(1))
+			Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(Equal(
+				"registry.k8s.io/pause:3.10",
+			))
 		})
 	})
 })
