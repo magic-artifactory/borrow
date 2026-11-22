@@ -2,7 +2,7 @@ name: Release Stable
 
 on:
   workflow_run:
-    workflows: ["borrow - CI"]
+    workflows: ["CD release"]
     types: [completed]
     branches: [stable]
 
@@ -22,29 +22,52 @@ jobs:
       sha: ${{ steps.release.outputs.sha }}
 
     steps:
-      - uses: googleapis/release-please-action@v5
+      - name: Resolve stable tag
         id: release
-        with:
-          target-branch: stable
-          config-file: .github/release-config.json
-          manifest-file: .github/.release-manifest.json
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+
+          git fetch --force --tags origin
+
+          tag="$(
+            git tag --points-at "$SHA" |
+              grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' |
+              sort -V |
+              tail -n 1 || true
+          )"
+
+          if [[ -z "$tag" ]]; then
+            echo "No stable semver tag points at $SHA" >&2
+            exit 1
+          fi
+
+          echo "release_created=true" >> "$GITHUB_OUTPUT"
+          echo "tag_name=$tag" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v7
-        if: ${{ steps.release.outputs.release_created == 'true' }}
         with:
           fetch-depth: 0
           ref: ${{ steps.release.outputs.tag_name }}
 
       - name: Build & publish
-        if: ${{ steps.release.outputs.release_created == 'true' }}
         run: make
 
       - name: Upload to GitHub Release
-        if: ${{ steps.release.outputs.release_created == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload ${{ steps.release.outputs.tag_name }} bin/manager
+          if gh release view "${{ steps.release.outputs.tag_name }}" >/dev/null 2>&1; then
+            gh release upload "${{ steps.release.outputs.tag_name }}" bin/manager --clobber
+          else
+            gh release create "${{ steps.release.outputs.tag_name }}" \
+              bin/manager \
+              --verify-tag \
+              --generate-notes \
+              --title "${{ steps.release.outputs.tag_name }}"
+          fi
 
   docker-release:
     needs: release
@@ -80,6 +103,7 @@ jobs:
             type=semver,pattern={{version}},value=${{ needs.release.outputs.tag_name }}
             type=semver,pattern={{major}}.{{minor}},value=${{ needs.release.outputs.tag_name }}
             type=raw,value=stable
+            type=raw,value=latest
 
       - name: Build and push
         uses: docker/build-push-action@v7
